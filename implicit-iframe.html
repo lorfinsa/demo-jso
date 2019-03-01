@@ -6,7 +6,7 @@
         <meta name="description" content="Live demo of JSO OAuth library">
         <meta name="author" content="Andreas Åkre Solberg">
 
-        <title>JSO Demo Popup</title>
+        <title>JSO Demo iframe</title>
 
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
     </head>
@@ -16,9 +16,8 @@
         <div class="container">
 
             <div class="py-5 text-center">
-                <h2>JSO Demo Popup</h2>
+                <h2JSO Demo iframe</h2>
                 <p class="lead">This is a live operational demo of JSO.</p>
-                <button id="btnAuthenticate">Login BS</button>
             </div>
 
             <footer class="my-5 pt-5 text-muted text-center text-small">
@@ -36,33 +35,37 @@
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
 
         <script type="text/javascript" src="../dist/jso.js"></script>
-        <!--OPCION DE LOGIN EN VENTANA NUEVA-->
+        <!--OPCION DE LOGIN COMO IFRAME-->
+        <!--hay agregar en el server http.headers().frameOptions().disable()  para permitir traer el login dentro de un iframe-->
+        <!--le saqué a la librería un timeout que tenía de 5 segundos para que funcionara-->
         <script type="text/javascript">
+
             let client = new jso.JSO({
                 providerID: "BS",
                 client_id: "prueba_oauth",
-                redirect_uri: "http://localhost:81/jso/prueba-sso-js/code-popup.html", // The URL where you is redirected back, and where you perform run the callback() function.
-                authorization: "http://cs-api-desa.lorfin.com.ar/oauth/authorize",
+                redirect_uri: "http://localhost:81/jso/prueba-sso-js/implicit-iframe.html", // The URL where you is redirected back, and where you perform run the callback() function.
+                authorization: "http://localhost:9999/oauth/authorize",
                 scopes: {request: ["APP"]}
             });
 
-            function authorizePopup() {
-                let opts = {
-                    redirect_uri: "http://localhost:81/jso/prueba-sso-js/code-popup.html"
-                }
-                client.setLoader(jso.Popup)
-                client.getToken(opts)
-                        .then((token) => {
-                            console.log("I got the token: ", token)
-                        })
-                        .catch((err) => {
-                            console.error("Error from passive loader", err)
-                        })
-            }
-            $("#btnAuthenticate").on('click', (e) => {
-                e.preventDefault()
-                authorizePopup()
-            })
+            let opts = {
+                scopes: {
+                    request: ['APP']
+                },
+                request: {
+                    prompt: "none"
+                },
+                response_type: 'token',
+                redirect_uri: "http://localhost:81/jso/prueba-sso-js/code-iframe"
+            };
+            client.setLoader(jso.IFramePassive)
+            client.getToken(opts)
+                    .then((token) => {
+                        console.log("I got the token: ", token)
+                    })
+                    .catch((err) => {
+                        console.error("Error from passive loader", err)
+                    });
         </script>
     </body>
 </html>
